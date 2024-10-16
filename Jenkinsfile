@@ -4,7 +4,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git 'https://github.com/your-repo/dockerized-app.git'
+                git 'https://github.com/emanadel0/DevOps-DEPI-graduation-project.git'
             }
         }
 
@@ -29,7 +29,7 @@ pipeline {
         stage('Deploy') {
             steps {
                 ansiblePlaybook credentialsId: 'ansible-ssh-key', 
-                playbook: 'anplaybook.yml', 
+                playbook: 'playbook.yml', 
                 inventory: 'hosts.ini'
             }
         }
