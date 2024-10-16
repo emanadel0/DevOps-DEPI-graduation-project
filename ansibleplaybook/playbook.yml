@@ -1,0 +1,21 @@
+---
+---
+- name: Deploy Dockerized Application
+  hosts: webservers
+  become: yes
+  tasks:
+    - name: Install Docker
+      apt:
+        name: docker.io
+        state: present
+        update_cache: yes
+
+    - name: Run Docker container
+      docker_container:
+        name: flask-app
+        image: flask-app:latest
+        state: started
+        ports:
+          - "5000:5000"
+
+
