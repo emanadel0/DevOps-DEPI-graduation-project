@@ -1,1 +1,26 @@
+---
+- name: Deploy Dockerized Application
+  hosts: webservers
+  become: yes
+  tasks:
+    - name: Install Docker
+      apt:
+        name: docker.io
+        state: present
+        update_cache: yes
+
+    - name: Pull Docker image from registry
+      docker_image:
+        name: emanadel911/your-app
+        tag: latest
+        source: pull
+
+    - name: Run Docker container
+      docker_container:
+        name: your-app
+        image: emanadel911/your-app:latest
+        state: started
+        restart_policy: always
+        ports:
+          - "80:5000"
 
