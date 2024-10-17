@@ -1,23 +1,11 @@
-# Create an EKS Cluster
-module "eks" {
-  source          = "terraform-aws-modules/eks/aws"
-  cluster_name    = "my-eks-cluster"
-  cluster_version = "1.25"
-  subnets         = [aws_subnet.public_subnet.id, aws_subnet.private_subnet.id]
-  vpc_id          = aws_vpc.main_vpc.id
-
-  node_groups = {
-    ng1 = {
-      desired_capacity = 2
-      max_capacity     = 3
-      min_capacity     = 1
-      instance_type    = "t3.medium"
-    }
-    ng2 = {
-      desired_capacity = 2
-      max_capacity     = 3
-      min_capacity     = 1
-      instance_type    = "t3.medium"
-    }
+# Jenkins EC2 Instance
+resource "aws_instance" "jenkins_ec2" {
+  ami           = "ami-0c55b159cbfafe1f0" # Amazon Linux 2 AMI
+  instance_type = "t2.micro"
+  subnet_id     = aws_subnet.public_subnet.id
+  security_groups = [aws_security_group.public_sg.name]
+  tags = {
+    Name = "jenkins-ec2"
   }
 }
+
