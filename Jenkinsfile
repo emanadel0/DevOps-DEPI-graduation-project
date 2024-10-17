@@ -84,6 +84,18 @@ pipeline {
         }
     }
 }
+    stage('Test Deployment') {
+    steps {
+        script {
+            // Example of checking if the service is running
+            def response = sh(script: 'curl -s http://your-server-ip:5000', returnStdout: true).trim()
+            if (!response.contains("Hello, Dockerized World!")) {
+                error("Application deployment failed")
+            }
+        }
+    }
+}
+
 
 
 
