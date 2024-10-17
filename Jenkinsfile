@@ -61,7 +61,7 @@ pipeline {
              body: "Good news, the build for ${env.build-dockerized-app} #${env.BUILD_NUMBER} was successful!"
     }
     failure {
-        mail to: 'your-email@example.com',
+        mail to: 'emansultan99@gmail.com',
              subject: "Build Failed: ${env.build-dockerized-app} #${env.BUILD_NUMBER}",
              body: "Oops, the build for ${env.build-dockerized-app} #${env.BUILD_NUMBER} failed."
     }
@@ -78,7 +78,7 @@ pipeline {
     steps {
         script {
             docker.withRegistry('https://index.docker.io/v1/', 'dockerhub-credentials') {
-                def image = docker.build("emanadel911/your-app:${env.BUILD_NUMBER}")
+                def image = docker.build("emanadel911/flask-app:${env.BUILD_NUMBER}")
                 image.push()
             }
         }
@@ -100,6 +100,59 @@ pipeline {
         script {
             sh 'kubectl apply -f deployment.yaml'
             sh 'kubectl apply -f service.yaml'
+        }
+    }
+}
+    stage('Parallel Stages') {
+    parallel {
+        stage('Unit Tests') {
+            steps {
+                sh 'python -m unittest discover -s tests'
+            }
+        }
+        stage('Linting') {
+            steps {
+                sh 'flake8 app.py'
+            }
+        }
+    }
+}
+    
+environment {
+    DOCKER_IMAGE = 'emanadel911/flask-app'
+    K8S_DEPLOYMENT = 'deployment.yaml'
+    K8S_SERVICE = 'service.yaml'
+}
+    
+stage('Integration Tests') {
+            steps {
+                script {
+                    def response = sh(script: 'curl -s http://your-staging-server-ip:80', returnStdout: true).trim()
+                    if (!response.contains("Hello, Dockerized World!")) {
+                        error("Integration tests failed.")
+                    }
+                }
+            }
+        }
+
+        stage('Deploy to Production') {
+            when {
+                branch 'main'
+            }
+            steps {
+                script {
+                    sh 'kubectl apply -f ${K8S_DEPLOYMENT} --record'
+                    sh 'kubectl apply -f ${K8S_SERVICE} --record'
+                }
+            }
+        }
+    }
+    post {
+        success {
+            echo 'CI/CD Pipeline completed successfully.'
+        }
+        failure {
+            echo 'CI/CD Pipeline failed.'
         }
     }
 }
