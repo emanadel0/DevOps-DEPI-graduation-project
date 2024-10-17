@@ -25,6 +25,17 @@ pipeline {
                 }
             }
         }
+        stage('Test') {
+    steps {
+        script {
+            docker.image('flask-app').inside {
+                sh 'python -m unittest discover -s tests'
+            }
+        }
+    }
+}
+
+        
 
         stage('Deploy') {
             steps {
@@ -43,5 +54,38 @@ pipeline {
             echo 'Deployment failed'
         }
     }
+    post {
+    success {
+        mail to: 'emansultan99@gmail.com',
+             subject: "Build Successful: ${env.build-dockerized-app} #${env.BUILD_NUMBER}",
+             body: "Good news, the build for ${env.build-dockerized-app} #${env.BUILD_NUMBER} was successful!"
+    }
+    failure {
+        mail to: 'your-email@example.com',
+             subject: "Build Failed: ${env.build-dockerized-app} #${env.BUILD_NUMBER}",
+             body: "Oops, the build for ${env.build-dockerized-app} #${env.BUILD_NUMBER} failed."
+    }
+}
+    post {
+    success {
+        slackSend (channel: 'DevOps graduation project', color: 'good', message: "Build Successful: ${env.build-dockerized-app} #${env.BUILD_NUMBER}")
+    }
+    failure {
+        slackSend (channel: 'DevOps graduation project', color: 'danger', message: "Build Failed: ${env.build-dockerized-app} #${env.BUILD_NUMBER}")
+    }
+}
+    stage('Push to Docker Hub') {
+    steps {
+        script {
+            docker.withRegistry('https://index.docker.io/v1/', 'dockerhub-credentials') {
+                def image = docker.build("emanadel911/your-app:${env.BUILD_NUMBER}")
+                image.push()
+            }
+        }
+    }
+}
+
+
+
 }
 
